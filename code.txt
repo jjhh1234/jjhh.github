@@ -1,0 +1,31 @@
+import requests
+from bs4 import BeautifulSoup
+
+def search_on_nara_jangteo(keyword, period):
+    base_url = "https://www.g2b.go.kr/ep/tbid/tbidList.do?taskClCds=&searchType=1&bidNm={}&searchDtType=1&fromBidDt={}&toBidDt={}&fromOpenBidDt=&toOpenBidDt=&radOrgan=1&instNm=&refNo=&area=&areaNm=&industry=&industryNm=&budget=&budgetCompare=UP&detailPrdnmNo=&detailPrdnm=&procmntReqNo=&intbidYn=&regYn=Y&recordCountPerPage=10"
+
+    url = base_url.format(keyword, period, period)
+
+    response = requests.get(url)
+
+    if response.status_code == 200:
+        soup = BeautifulSoup(response.text, 'html.parser')
+
+        table = soup.find('table', class_='table_col_type1')
+        rows = table.find_all('tr')
+
+        file_path = "C:\Data\test.txt" 
+        with open(file_path, 'w', encoding='utf-8') as file:
+            for row in rows:
+                cells = row.find_all('td')
+                if len(cells) > 1:
+                    title = cells[1].get_text().strip()
+                    file.write(title + '\n')
+        print(f"검색 결과가 {file_path}에 저장되었습니다.")
+    else:
+        print("나라장터에 접속할 수 없습니다.")
+
+keyword = input("공고명을 입력하세요: ")
+period = input("기간을 입력하세요 (예: 2019-01-01): ")
+
+search_on_nara_jangteo(keyword, period)
